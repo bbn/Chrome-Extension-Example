@@ -1,7 +1,7 @@
 {
-  "name": "Asana Extension for Chrome",
-  "version": "0.9.1",
-  "description": "Integrates Asana with your browsing experience.",
+  "name": "Mainsocial Asana Extension for Chrome",
+  "version": "0.0.2",
+  "description": "meeeeeeep",
   "icons": {
     "128": "icon128.png"
   },
@@ -9,7 +9,7 @@
 
   "browser_action": {
     "default_icon": "icon19.png",
-    "default_title": "Asana",
+    "default_title": "Mainsocial Asana",
     "default_popup": "popup.html"
   },
   "background_page": "background.html",

@@ -40,9 +40,9 @@
         </tr>
 
         <tr>
-          <td class="field-name">Project:</td>
+          <td class="field-name">Projects:</td>
           <td class="field-value">
-            <select id="project"><option>Loading...</option></select>
+            <ul id="project"><li>Loading...</li></ul>
           </td>
         </tr>
 
@@ -188,9 +188,8 @@
         $("#project").html("");
         projects.forEach(function(project) {
           $("#project").append(
-              "<option value='" + project.id + "'>" + project.name + "</option>");
+              "<li><input type='checkbox' value='"+ project.id + "'>" + project.name + "</li>");
         });
-        $("#project").val(options.default_project_id);
       });
     });
   };
@@ -257,8 +256,12 @@
     return $("#workspace").val();
   };
 
-  var readProjectId = function() {
-    return $("#project").val();
+  var readProjectIds = function() {
+     var project_ids = [];
+     $('#project :checked').each(function() {
+       project_ids.push($(this).val());
+     });
+     return project_ids;
   };
 
   var createTask = function() {
@@ -272,24 +275,36 @@
           notes: $("#notes").val(),
           assignee: readAssignee()
         },
-        function(task) {
-          Asana.ServerModel.addProject(
-            task.id,
-            readProjectId(),
-            function(response) {
-              setAddWorking(false);
-              showSuccess(task);
-            },
-            function(response) {
-              setAddWorking(false);
-              showError(response.errors[0].message);
-            });
-        },
-        function(response) {
-          setAddWorking(false);
-          showError(response.errors[0].message);
-        });
+        addProjectsToTask,
+        handleTaskCreationError);
   };
+
+  var addProjectsToTask = function(task) {
+    var project_ids = readProjectIds();
+    var number_of_projects = project_ids.length;
+    var number_added = 0;
+    var finishSingleProjectAdd = function(response) {  
+      if ((++number_added) == number_of_projects) 
+        finishAllProjectAdds();
+    };
+    var finishAllProjectAdds = function(response) {
+      setAddWorking(false);
+      showSuccess(task);
+    };
+    for (var i=0;i<number_of_projects;i++) {
+      Asana.ServerModel.addProject(
+        task.id,
+        project_ids[i],
+        finishSingleProjectAdd,
+        handleTaskCreationError);
+    }          
+  };
+
+  var handleTaskCreationError = function(response) {
+    setAddWorking(false);
+    showError(response.errors[0].message);
+  };
+
 
   var showError = function(message) {
     console.log("Error: " + message);
